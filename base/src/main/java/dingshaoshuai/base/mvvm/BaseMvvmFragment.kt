@@ -20,7 +20,11 @@ abstract class BaseMvvmFragment<T : ViewDataBinding, E : BaseViewModel> : BaseFr
     protected abstract fun initViewModel(): E
     protected abstract fun bindViewModel(viewModel: E)
 
-    override fun initContentView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun initContentView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         binding = DataBindingUtil.inflate(inflater, layoutId, container, false)
         return binding.root
     }
@@ -28,6 +32,7 @@ abstract class BaseMvvmFragment<T : ViewDataBinding, E : BaseViewModel> : BaseFr
     override fun initCustom() {
         super.initCustom()
         viewModel = initViewModel()
+        lifecycle.addObserver(viewModel)
         bindViewModel(viewModel)
         initObserver()
     }
@@ -44,6 +49,11 @@ abstract class BaseMvvmFragment<T : ViewDataBinding, E : BaseViewModel> : BaseFr
                 }
             })
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        lifecycle.removeObserver(viewModel)
     }
 
 }

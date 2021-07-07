@@ -19,6 +19,7 @@ abstract class BaseMvvmActivity<T : ViewDataBinding, E : BaseViewModel> : BaseAc
     override fun initCustom() {
         super.initCustom()
         viewModel = initViewModel()
+        lifecycle.addObserver(viewModel)
         bindViewModel(viewModel)
         initObserver()
     }
@@ -40,5 +41,10 @@ abstract class BaseMvvmActivity<T : ViewDataBinding, E : BaseViewModel> : BaseAc
                 }
             })
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        lifecycle.removeObserver(viewModel)
     }
 }

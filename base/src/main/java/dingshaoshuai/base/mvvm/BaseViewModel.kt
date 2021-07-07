@@ -2,12 +2,13 @@ package dingshaoshuai.base.mvvm
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import dingshaoshuai.base.BaseLifecycleObserver
 
 /**
  * @author: Xiao Bo
  * @date: 11/6/2021
  */
-open class BaseViewModel : ViewModel() {
+open class BaseViewModel : ViewModel(), BaseLifecycleObserver {
     val uiChangeLiveData = UIChangeLiveData()
 
     inner class UIChangeLiveData {
