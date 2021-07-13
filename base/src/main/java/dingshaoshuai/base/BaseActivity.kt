@@ -65,6 +65,11 @@ abstract class BaseActivity : AppCompatActivity() {
         }.init()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        ImmersionBar.with(this).destroy()
+    }
+
     protected abstract fun initContentView()
     protected open fun initCustom() {}
     protected open fun initClickListener() {}
