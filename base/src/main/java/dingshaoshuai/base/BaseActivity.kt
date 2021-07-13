@@ -2,10 +2,15 @@ package dingshaoshuai.base
 
 import android.app.Activity
 import android.app.ProgressDialog
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
+import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.gyf.barlibrary.ImmersionBar
 import java.lang.reflect.Method
@@ -23,6 +28,7 @@ abstract class BaseActivity : AppCompatActivity() {
     protected open val getNavigationBarColor = android.R.color.transparent
     protected open val isStatusBarDarkFont = true
     private var progressDialog: ProgressDialog? = null
+    protected open val enableEditTextFocusChange = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,5 +81,47 @@ abstract class BaseActivity : AppCompatActivity() {
 
     open fun dismissLoadingDialog() {
         progressDialog?.dismiss()
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        if (!enableEditTextFocusChange) {
+            return super.dispatchTouchEvent(ev)
+        }
+        if (ev?.action === MotionEvent.ACTION_UP) {
+            val view = currentFocus
+            if (isShouldHideInput(view, ev)) {
+                val imm: InputMethodManager =
+                    getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(view!!.windowToken, 0)
+            }
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    /**
+     * 点击其他区域，EditText 失去焦点并收起键盘
+     */
+    private fun isShouldHideInput(view: View?, ev: MotionEvent?): Boolean {
+        view ?: return false
+        ev ?: return false
+        if (view !is EditText) return false
+        val leftTop = intArrayOf(0, 0)
+        // 获取输入框在当前屏幕上的位置
+        view.getLocationOnScreen(leftTop)
+        val left = leftTop[0]
+        val top = leftTop[1]
+        val bottom: Int = top + view.getHeight()
+        val right: Int = left + view.getWidth()
+        // 获取光标(触摸点)在当前屏幕上的位置
+        val locationX: Float = ev.rawX
+        val locationY: Float = ev.rawY
+        return if (locationX > left && locationX < right && locationY > top && locationY < bottom) {
+            // 点击的是输入框区域，保留点击EditText事件
+            false
+        } else {
+            // 失去焦点
+            view.clearFocus()
+            true
+        }
     }
 }
