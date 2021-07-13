@@ -7,7 +7,4 @@ package dingshaoshuai.base.feature.json
 interface JsonParse {
     fun <T> toObject(json: String, clazz: Class<T>): T
     fun toJsonString(any: Any): String
-    fun <T> toList(json: String, clazz: Class<T>): List<T>
-    fun <T> toMap(json: String): Map<String, T>
-    fun <T> toListMap(json: String): List<Map<String, T>>
 }
