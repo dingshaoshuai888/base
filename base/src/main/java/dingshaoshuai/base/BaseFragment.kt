@@ -17,9 +17,9 @@ abstract class BaseFragment : Fragment() {
     protected abstract val layoutId: Int
     protected abstract fun initContentView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
 
-    protected open fun initView() {}
-    protected open fun initCustom() {}
-    protected open fun initClickListener() {}
+    protected open fun initView(view: View) {}
+    protected open fun initCustom(view: View) {}
+    protected open fun initClickListener(view: View) {}
     protected open fun initData() {}
 
     override fun onAttach(context: Context) {
@@ -36,9 +36,9 @@ abstract class BaseFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initView()
-        initCustom()
-        initClickListener()
+        initView(view)
+        initCustom(view)
+        initClickListener(view)
         initData()
     }
 
