@@ -1,5 +1,6 @@
 package dingshaoshuai.base
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Context
@@ -40,6 +41,7 @@ abstract class BaseActivity : AppCompatActivity() {
         initData()
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     private fun initScreenOrientation() {
         if (!isScreenPortrait) return
         if (Build.VERSION.SDK_INT >= 26) {
