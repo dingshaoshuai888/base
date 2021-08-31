@@ -1,6 +1,7 @@
 package dingshaoshuai.base.pack
 
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.widget.ImageView
 import com.bumptech.glide.Glide
@@ -22,11 +23,21 @@ class GlideImageLoader : ImageLoader {
         Glide.with(imageView).load(url).apply(requestOptions).into(imageView)
     }
 
-    override fun load(imageView: ImageView, bitmap: Bitmap) {
-        Glide.with(imageView).load(bitmap).into(imageView)
+    override fun load(imageView: ImageView, url: String, defaultDrawable: Drawable) {
+        val requestOptions =
+            RequestOptions().error(defaultDrawable).placeholder(defaultDrawable)
+        Glide.with(imageView).load(url).apply(requestOptions).into(imageView)
     }
 
-    override fun load(imageView: ImageView, uri: Uri) {
-        Glide.with(imageView).load(uri).into(imageView)
+    override fun load(imageView: ImageView, bitmap: Bitmap, defaultDrawable: Drawable) {
+        val requestOptions =
+            RequestOptions().error(defaultDrawable).placeholder(defaultDrawable)
+        Glide.with(imageView).load(bitmap).apply(requestOptions).into(imageView)
+    }
+
+    override fun load(imageView: ImageView, uri: Uri, defaultDrawable: Drawable) {
+        val requestOptions =
+            RequestOptions().error(defaultDrawable).placeholder(defaultDrawable)
+        Glide.with(imageView).load(uri).apply(requestOptions).into(imageView)
     }
 }

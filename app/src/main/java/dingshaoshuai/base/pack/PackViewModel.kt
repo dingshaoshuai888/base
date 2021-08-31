@@ -17,8 +17,6 @@ class PackViewModel : BaseViewModel() {
 
         val jsonString = JsonParseProxy.instance.toJsonString(study)
         Log.i(TAG, "jsonString: $jsonString")
-        val map = JsonParseProxy.instance.toMap<String>(jsonString)
-        Log.i(TAG, "toJsonString(map): ${JsonParseProxy.instance.toJsonString(map)}")
 
         val toObject = JsonParseProxy.instance.toObject(
             "{\"age\":\"20\",\"name\":\"小明\",\"sex\":\"男\"}",
