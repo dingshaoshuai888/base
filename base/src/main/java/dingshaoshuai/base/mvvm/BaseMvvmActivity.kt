@@ -18,14 +18,15 @@ abstract class BaseMvvmActivity<T : ViewDataBinding, E : BaseViewModel> : BaseAc
 
     override fun initCustom() {
         super.initCustom()
-        viewModel = initViewModel()
-        lifecycle.addObserver(viewModel)
-        bindViewModel(viewModel)
         initObserver()
     }
 
     override fun initContentView() {
+        viewModel = initViewModel()
+        lifecycle.addObserver(viewModel)
         binding = DataBindingUtil.setContentView(this, layoutId)
+        binding.lifecycleOwner = this
+        bindViewModel(viewModel)
     }
 
     protected open fun initObserver() {
