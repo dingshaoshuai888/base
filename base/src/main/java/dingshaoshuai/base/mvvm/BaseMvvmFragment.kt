@@ -25,16 +25,16 @@ abstract class BaseMvvmFragment<T : ViewDataBinding, E : BaseViewModel> : BaseFr
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        viewModel = initViewModel()
+        lifecycle.addObserver(viewModel)
         binding = DataBindingUtil.inflate(inflater, layoutId, container, false)
         binding.lifecycleOwner = this
+        bindViewModel(viewModel)
         return binding.root
     }
 
     override fun initCustom(view: View) {
         super.initCustom(view)
-        viewModel = initViewModel()
-        lifecycle.addObserver(viewModel)
-        bindViewModel(viewModel)
         initObserver()
     }
 
