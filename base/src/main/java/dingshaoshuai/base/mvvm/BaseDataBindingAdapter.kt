@@ -13,11 +13,13 @@ import androidx.recyclerview.widget.RecyclerView
  */
 class DataBindingViewHolder<T : ViewDataBinding>(val binding: T) : RecyclerView.ViewHolder(binding.root)
 
-abstract class BaseDatabindingAdapter<T, E : ViewDataBinding> :
+abstract class BaseDataBindingAdapter<T, E : ViewDataBinding> :
     RecyclerView.Adapter<DataBindingViewHolder<E>>() {
+    var itemClickListener: ItemClickListener<T>? = null
+    var itemChildClickListener: ItemChildClickListener<T>? = null
 
     protected abstract val layoutId: Int
-    protected abstract fun onBind(binding: E, data: T)
+    protected abstract fun onBind(binding: E, data: T, position: Int)
 
     var dataList: List<T>? = null
         set(value) {
@@ -37,7 +39,7 @@ abstract class BaseDatabindingAdapter<T, E : ViewDataBinding> :
 
     override fun onBindViewHolder(holder: DataBindingViewHolder<E>, position: Int) {
         dataList ?: return
-        onBind(holder.binding, dataList!![position])
+        onBind(holder.binding, dataList!![position], position)
         holder.binding.executePendingBindings()
     }
 
