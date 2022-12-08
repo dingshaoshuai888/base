@@ -1,5 +1,6 @@
 package dingshaoshuai.base.ktx
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -28,13 +29,20 @@ suspend inline fun <T> ViewModel.launchSuspend(
     crossinline failureBlock: (T?) -> Unit = {},
     crossinline completeBlock: (T?) -> Unit = {}
 ) {
-    val blockIOValue = withContext(Dispatchers.IO) {
-        blockIO()
+    var value: T? = null
+    try {
+        value = withContext(Dispatchers.IO) {
+            blockIO()
+        }
+        if (checkBlock(value)) {
+            successBlock(value)
+        } else {
+            failureBlock(value)
+        }
+    } catch (e: Exception) {
+        Log.e("ViewModelKt", "launchSuspend: ${e.message}")
+        failureBlock(value)
+    } finally {
+        completeBlock(value)
     }
-    if (checkBlock(blockIOValue)) {
-        successBlock(blockIOValue)
-    } else {
-        failureBlock(blockIOValue)
-    }
-    completeBlock(blockIOValue)
 }

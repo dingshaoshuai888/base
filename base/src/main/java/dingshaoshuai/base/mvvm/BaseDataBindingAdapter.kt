@@ -11,15 +11,15 @@ import androidx.recyclerview.widget.RecyclerView
  * @author: Xiao Bo
  * @date: 10/6/2021
  */
-class DataBindingViewHolder<T : ViewDataBinding>(val binding: T) : RecyclerView.ViewHolder(binding.root)
+class DataBindingViewHolder<V : ViewDataBinding>(val binding: V) : RecyclerView.ViewHolder(binding.root)
 
-abstract class BaseDataBindingAdapter<T, E : ViewDataBinding> :
-    RecyclerView.Adapter<DataBindingViewHolder<E>>() {
+abstract class BaseDataBindingAdapter<T, V : ViewDataBinding> :
+    RecyclerView.Adapter<DataBindingViewHolder<V>>() {
     var itemClickListener: ItemClickListener<T>? = null
     var itemChildClickListener: ItemChildClickListener<T>? = null
 
     protected abstract val layoutId: Int
-    protected abstract fun onBind(binding: E, data: T, position: Int)
+    protected abstract fun onBind(binding: V, data: T, position: Int)
 
     var dataList: List<T>? = null
         set(value) {
@@ -27,8 +27,8 @@ abstract class BaseDataBindingAdapter<T, E : ViewDataBinding> :
             notifyDataSetChanged()
         }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBindingViewHolder<E> {
-        val binding: E = DataBindingUtil.inflate(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBindingViewHolder<V> {
+        val binding: V = DataBindingUtil.inflate(
             LayoutInflater.from(parent.context),
             layoutId, parent, false
         )
@@ -37,7 +37,7 @@ abstract class BaseDataBindingAdapter<T, E : ViewDataBinding> :
 
     override fun getItemCount(): Int = dataList?.size ?: 0
 
-    override fun onBindViewHolder(holder: DataBindingViewHolder<E>, position: Int) {
+    override fun onBindViewHolder(holder: DataBindingViewHolder<V>, position: Int) {
         dataList ?: return
         onBind(holder.binding, dataList!![position], position)
         holder.binding.executePendingBindings()
@@ -48,6 +48,6 @@ abstract class BaseDataBindingAdapter<T, E : ViewDataBinding> :
     }
 
     interface ItemChildClickListener<T> {
-        fun onItemChildClick(view: View, data: T)
+        fun onItemChildClick(view: View, data: T, position: Int)
     }
 }

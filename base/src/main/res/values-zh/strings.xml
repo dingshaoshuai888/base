@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="base_placeholder_refresh">刷新</string>
+    <string name="base_placeholder_error">网络错误</string>
+    <string name="base_placeholder_empty">暂无数据</string>
+</resources>

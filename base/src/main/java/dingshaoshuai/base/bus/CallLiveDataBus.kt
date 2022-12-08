@@ -10,10 +10,11 @@ object CallLiveDataBus {
 
     private val map = HashMap<String, CallLiveData>()
 
-    fun with(key: String): CallLiveData {
-        if (!map.containsKey(key)) {
-            map[key] = CallLiveData()
-        }
-        return map[key]!!
+    fun with(key: String) = if (!map.containsKey(key)) {
+        val value = CallLiveData()
+        map[key] = value
+        value
+    } else {
+        map[key]!!
     }
 }

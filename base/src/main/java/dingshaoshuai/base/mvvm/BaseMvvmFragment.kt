@@ -1,24 +1,24 @@
 package dingshaoshuai.base.mvvm
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
-import androidx.lifecycle.Observer
 import dingshaoshuai.base.BaseFragment
 
 /**
  * @author: Xiao Bo
  * @date: 10/6/2021
  */
-abstract class BaseMvvmFragment<T : ViewDataBinding, E : BaseViewModel> : BaseFragment() {
-    protected lateinit var binding: T
-    protected lateinit var viewModel: E
+abstract class BaseMvvmFragment<V : ViewDataBinding, VM : BaseViewModel> : BaseFragment() {
+    protected lateinit var binding: V
+    protected lateinit var viewModel: VM
 
-    protected abstract fun initViewModel(): E
-    protected abstract fun bindViewModel(viewModel: E)
+    protected abstract fun initViewModel(): VM
+    protected abstract fun bindViewModel(viewModel: VM)
 
     override fun initContentView(
         inflater: LayoutInflater,
@@ -40,7 +40,7 @@ abstract class BaseMvvmFragment<T : ViewDataBinding, E : BaseViewModel> : BaseFr
 
     protected open fun initObserver() {
         viewModel.uiChangeLiveData.let {
-            it.loadingDialogLiveData.observe(this, Observer { show ->
+            it.loadingDialogLiveData.observe(this) { show ->
                 mActivity?.let { baseActivity ->
                     if (show) {
                         baseActivity.showLoadingDialog()
@@ -48,13 +48,33 @@ abstract class BaseMvvmFragment<T : ViewDataBinding, E : BaseViewModel> : BaseFr
                         baseActivity.dismissLoadingDialog()
                     }
                 }
-            })
+            }
+            it.startActivityLiveData.observe(this) { map ->
+                val activity = mActivity ?: return@observe
+                val clazz = map[BaseViewModel.START_ACTIVITY_CLASS]
+                val bundle = map[BaseViewModel.START_ACTIVITY_BUNDLE]
+                val flags = map[BaseViewModel.START_ACTIVITY_FLAGS]
+                val intent = Intent().apply {
+                    setClass(activity, clazz as Class<*>)
+                    bundle?.let { bundle -> putExtras(bundle as Bundle) }
+                    flags?.let { flags -> this.flags = flags as Int }
+                }
+                activity.startActivity(intent)
+            }
         }
+    }
+
+    override fun initData() {
+        super.initData()
+        viewModel.initData()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        lifecycle.removeObserver(viewModel)
+        // 防止应用被后台杀死提前 finish 导致 viewModel 还没有初始化
+        if (::viewModel.isInitialized) {
+            lifecycle.removeObserver(viewModel)
+        }
     }
 
 }

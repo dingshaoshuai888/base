@@ -2,18 +2,22 @@ package dingshaoshuai.base
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import com.gyf.barlibrary.ImmersionBar
+import dingshaoshuai.base.util.LogUtil
 import java.lang.reflect.Method
 
 /**
@@ -22,22 +26,58 @@ import java.lang.reflect.Method
  */
 abstract class BaseActivity : AppCompatActivity() {
 
+    // 布局文件
     protected abstract val layoutId: Int
+
+    // 是否强制竖屏
     protected open val isScreenPortrait = true
+
+    // 是否填充顶部状态栏 - true（填充） false（沉浸式）
     protected open val isFitsSystemWindows = true
-    protected open val getStatusBarBgColor = android.R.color.transparent
-    protected open val getNavigationBarColor = android.R.color.transparent
+
+    // 状态栏背景色
+    protected open val statusBarBgColor = android.R.color.transparent
+
+    // 底部导航栏颜色
+    protected open val navigationBarColor = android.R.color.white
+
+    // 状态栏字体颜色
     protected open val isStatusBarDarkFont = true
-    private var progressDialog: ProgressDialog? = null
+
+    // 默认的加载对话框
+    private var progressBar: ProgressBar? = null
+
+    // 是否启动点击其他区域收起键盘
     protected open val enableEditTextFocusChange = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 设置一些需要监听声明周期的操作
+        lifecycle.apply {
+            // 添加日志打印，方便根据类名称快速定位当前界面
+            addObserver(LogUtil)
+            val application = application
+            if (application is BaseApplication) {
+                // 供 App 在 Activity 的生命周期里做特有的业务逻辑
+                application.activityObserver?.let { addObserver(it) }
+                // 如果不等于 null 说明应用在后台被 kill
+                if (savedInstanceState != null) {
+                    application.onKilledAfterResume(this@BaseActivity)
+                    return
+                }
+            }
+        }
+        // 设置屏幕方向
         initScreenOrientation()
+        // 设置状态栏
         initStatusBar()
+        // 初始化布局
         initContentView()
+        // 添加一些自定义的操作
         initCustom()
+        // 添加监听事件
         initClickListener()
+        // 初始化页面内的数据
         initData()
     }
 
@@ -60,15 +100,20 @@ abstract class BaseActivity : AppCompatActivity() {
 
     private fun initStatusBar() {
         ImmersionBar.with(this).run {
+            // 填充顶部状态栏区域
             fitsSystemWindows(isFitsSystemWindows)
-            statusBarColor(getStatusBarBgColor)
+            // 顶部状态栏颜色
+            statusBarColor(statusBarBgColor)
+            // 顶部状态栏字体颜色
             statusBarDarkFont(isStatusBarDarkFont)
-            navigationBarColor(getNavigationBarColor)
+            // 底部导航栏背景色
+            navigationBarColor(navigationBarColor)
         }.init()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        // 页面销毁 ImmersionBar 也要销毁，防止内存泄漏
         ImmersionBar.with(this).destroy()
     }
 
@@ -78,19 +123,26 @@ abstract class BaseActivity : AppCompatActivity() {
     protected open fun initData() {}
 
     open fun showLoadingDialog() {
-        if (progressDialog == null) {
-            progressDialog = ProgressDialog(this)
-            progressDialog?.setCanceledOnTouchOutside(false)
-            progressDialog?.setCancelable(false)
+        if (progressBar == null) {
+            progressBar = ProgressBar(this)
+            val decorView = window?.decorView
+            if (decorView is FrameLayout) {
+                progressBar?.layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                ).apply { gravity = Gravity.CENTER }
+                decorView.addView(progressBar)
+            }
         }
-        progressDialog?.show()
+        progressBar?.isVisible = true
     }
 
     open fun dismissLoadingDialog() {
-        progressDialog?.dismiss()
+        progressBar?.isVisible = false
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        // 处理点击其他区域收起键盘操作
         if (!enableEditTextFocusChange) {
             return super.dispatchTouchEvent(ev)
         }
@@ -105,9 +157,7 @@ abstract class BaseActivity : AppCompatActivity() {
         return super.dispatchTouchEvent(ev)
     }
 
-    /**
-     * 点击其他区域，EditText 失去焦点并收起键盘
-     */
+    // 点击其他区域，EditText 失去焦点并收起键盘
     private fun isShouldHideInput(view: View?, ev: MotionEvent?): Boolean {
         view ?: return false
         ev ?: return false

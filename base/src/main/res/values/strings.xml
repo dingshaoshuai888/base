@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="base_placeholder_refresh">Refresh</string>
+    <string name="base_placeholder_error">Network error</string>
+    <string name="base_placeholder_empty">No data</string>
+</resources>

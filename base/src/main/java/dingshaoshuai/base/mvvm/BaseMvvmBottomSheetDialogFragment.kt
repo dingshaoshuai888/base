@@ -8,12 +8,12 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import dingshaoshuai.base.BaseBottomSheetDialogFragment
 
-abstract class BaseMvvmBottomSheetDialogFragment<T : ViewDataBinding, E : BaseViewModel> : BaseBottomSheetDialogFragment() {
-    protected lateinit var binding: T
-    protected lateinit var viewModel: E
+abstract class BaseMvvmBottomSheetDialogFragment<V : ViewDataBinding, VM : BaseViewModel> : BaseBottomSheetDialogFragment() {
+    protected lateinit var binding: V
+    protected lateinit var viewModel: VM
 
-    protected abstract fun initViewModel(): E
-    protected abstract fun bindViewModel(viewModel: E)
+    protected abstract fun initViewModel(): VM
+    protected abstract fun bindViewModel(viewModel: VM)
     protected open fun initObserver() {}
 
     override fun initContentView(
@@ -36,6 +36,9 @@ abstract class BaseMvvmBottomSheetDialogFragment<T : ViewDataBinding, E : BaseVi
 
     override fun onDestroy() {
         super.onDestroy()
-        lifecycle.removeObserver(viewModel)
+        // 防止应用被后台杀死提前 finish 导致 viewModel 还没有初始化
+        if (::viewModel.isInitialized) {
+            lifecycle.removeObserver(viewModel)
+        }
     }
 }
